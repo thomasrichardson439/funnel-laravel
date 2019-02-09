@@ -11,7 +11,6 @@ class BusinessReview extends Model
     use HasUuid, Searchable;
 
     protected $guarded = ['id'];
-    protected $with    = ['keywords'];
     protected $hidden  = ['uuid'];
 
     protected $indexConfigurator = \App\Elastic\Configurators\BusinessReview::class;
