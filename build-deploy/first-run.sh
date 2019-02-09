@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+# Ensure migrations are run
+php artisan migrate
+
 # Generate Key
 php artisan key:generate
 
@@ -19,7 +22,6 @@ php artisan passport:client --personal
 php artisan elastic:setup-indexes
 
 # Update cover photo for businesses
-php artisan update:place-avatar
 php artisan update:business-score
 
 # Cleanup

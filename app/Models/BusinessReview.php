@@ -24,27 +24,16 @@ class BusinessReview extends Model
             'business_id'   => $this->business->uuid,
             'user_id'       => $this->user_id,
             'type'          => 'review',
-            'images'        => $this->getImages(),
+            'cover_image'        => $this->cover_image,
             'location'      => [
                 'lat' => $this->business->lat,
                 'lon' => $this->business->lng
             ],
-            'code'          => $this->code,
+            'score'         => $this->score,
             'comment'       => $this->comment,
             'meta'          => $this->meta,
             'hours'         => $this->business->hours
         ];
-    }
-
-    /**
-     * @return \Illuminate\Database\Eloquent\Collection
-     */
-    public function getImages()
-    {
-        return $this
-                ->hasMany(BusinessReviewImage::class)
-                ->get(['path'])
-            ;
     }
 
     /**
@@ -59,13 +48,6 @@ class BusinessReview extends Model
      */
     public function user() {
         return $this->belongsTo(User::class);
-    }
-
-    /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
-     */
-    public function images() {
-        return $this->hasMany(BusinessReviewImage::class);
     }
 
     /**
@@ -88,11 +70,4 @@ class BusinessReview extends Model
             $this->hasMany(BusinessReviewKeyword::class)->pluck('keyword')->implode(', ');
     }
 
-    /**
-     * @param $data
-     * @return Model
-     */
-    public function createImage($data) {
-        return $this->images()->create($data);
-    }
 }

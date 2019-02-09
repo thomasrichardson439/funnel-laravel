@@ -7,7 +7,7 @@ $factory->define(App\Models\BusinessReview::class, function (Faker $faker) use (
         'uuid'        => $faker->uuid,
         'business_id' => $factory->create(App\Models\Business::class)->id,
         'user_id'     => $factory->create(App\Models\User::class)->id,
-        'code'        => $faker->randomDigitNotNull,
+        'score'       => $faker->randomDigitNotNull,
         'comment'     => $faker->text(50),
         'meta'        => $faker->text(50),
     ];

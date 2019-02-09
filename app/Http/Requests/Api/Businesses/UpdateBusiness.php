@@ -27,13 +27,13 @@ class UpdateBusiness extends FormRequest
     public function rules()
     {
         return [
-            'name'        => ['required', 'string', 'max:191'],
-            'lat'         => ['required', 'numeric', new Lat()],
-            'lng'         => ['required', 'numeric', new Lng()],
-            'category_id' => ['required', 'string'],
-            'bio'         => ['nullable', 'string'],
-            'avatar'      => ['nullable', 'file', 'image'],
-            'cover_photo'      => ['nullable', 'file', 'image']
+            'name'        => 'sometimes|required|string|max:191',
+            'lat'         => ['sometimes', 'required', 'numeric', new Lat()],
+            'lng'         => ['sometimes', 'required', 'numeric', new Lng()],
+            'category_id' => 'sometimes|required|string',
+            'bio'         => 'sometimes|string',
+            'avatar'      => 'sometimes|file|image',
+            'cover_photo' => 'sometimes|file|image',
         ];
     }
 }

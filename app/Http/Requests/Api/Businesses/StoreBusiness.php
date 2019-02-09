@@ -26,13 +26,13 @@ class StoreBusiness extends FormRequest
     public function rules()
     {
         return [
-            'name'        => ['required', 'string', 'max:191'],
+            'name'        => 'required|string|max:191',
             'lat'         => ['required', 'numeric', new Lat()],
             'lng'         => ['required', 'numeric', new Lng()],
-            'category_id' => ['required', 'string'],
-            'bio'         => ['nullable', 'string'],
-            'avatar'      => ['nullable', 'file', 'image'],
-            'cover_photo'      => ['nullable', 'file', 'image']
+            'category_id' => 'required|string',
+            'bio'         => 'sometimes|string',
+            'avatar'      => 'sometimes|file|image',
+            'cover_photo' => 'sometimes|file|image',
         ];
     }
 }

@@ -40,7 +40,7 @@ class BusinessBioController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @OA\Patch(
+     * @OA\Put(
      *     path="/api/v1/bookmark",
      *     summary="Updates a business bio",
      *     @OA\RequestBody(

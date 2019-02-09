@@ -4,6 +4,7 @@ namespace App\Http\Controllers\API\v1;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\Users\GetUserReviewsRequest;
+use App\Http\Resources\BusinessReviewCollectionResource;
 use App\Http\Resources\StickerResource;
 use App\Models\BusinessAttribute;
 use App\Models\Category;
@@ -42,6 +43,7 @@ class UserReviewsController extends Controller
     public function index($userId) {
         $perPage = request()->get('perPage') ?? 10;
         $data = $this->userService->getUserReviews($userId, $perPage);
-        return $this->sendResponse($data);
+
+        return $this->sendResponse(new BusinessReviewCollectionResource($data));
     }
 }

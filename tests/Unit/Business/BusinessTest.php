@@ -124,7 +124,7 @@ class BusinessTest extends TestCase
         $business       = factory(Business::class)->create();
         $businessReview = factory(\App\Models\BusinessReview::class, 7)->create([
             'business_id' => $business->id,
-            'code'        => 5
+            'score'        => 5
         ]);
 
         $business = Business::find($business->id);
@@ -152,7 +152,7 @@ class BusinessTest extends TestCase
         $user           = factory(\App\Models\User::class)->create();
         $business       = factory(Business::class)->create(['user_id' => $user->getKey()]);
 
-        $avatar = $business->avatar_photo_url;
+        $avatar = $business->avatar;
         $this->assertNull($avatar);
     }
 
@@ -162,7 +162,7 @@ class BusinessTest extends TestCase
         $user           = factory(\App\Models\User::class)->create();
         $business       = factory(Business::class)->create(['user_id' => $user->getKey(), 'avatar' => 'avatar']);
 
-        $avatar = $business->avatar_photo_url;
+        $avatar = $business->avatar;
         $this->assertNull($avatar);
     }
 
@@ -175,7 +175,7 @@ class BusinessTest extends TestCase
         $user           = factory(\App\Models\User::class)->create();
         $business       = factory(Business::class)->create(['user_id' => $user->getKey(), 'avatar' => $avatarFile]);
 
-        $avatar = $business->avatar_photo_url;
+        $avatar = $business->avatar;
         $this->assertEquals($expectedUrl, $avatar);
     }
 }

@@ -30,6 +30,10 @@ Route::get('/manifest', function () {
     ];
 });
 
+Route::put('put-test', function(\Illuminate\Support\Facades\Request $request) {
+    return $request;
+});
+
 Route::post('/login', 'Authentication\LoginController@store');
 Route::post('/register', 'Authentication\RegistrationController@create');
 
@@ -47,10 +51,10 @@ Route::post('/sms/verify', 'Authentication\VerificationController@verifySMS')->n
 /**
  *  Business
  */
-Route::group(['middleware' => ['auth:api', 'role:admin']], function () {
+//Route::group(['middleware' => ['auth:api', 'role:admin']], function () {
     Route::get('/businesses/geo-json', 'BusinessesController@geoJson');
     Route::get('/businesses/stats', 'BusinessesController@stats');
-});
+//});
 
 Route::post('/businesses/{business}/business-cover', 'BusinessCoverController@store');
 
@@ -66,18 +70,13 @@ Route::group(['middleware' => ['auth:api', 'verified']], function () {
      * User
      */
     Route::get('users', 'UsersController@index');
-    Route::post('users', 'UsersController@update');
+    Route::put('users', 'UsersController@update');
     Route::delete('users', 'UsersController@destroy');
 
     //Common items
     Route::get('/common', 'CommonItemsController@index');
 
 
-    /**
-     * Bookmark
-     */
-    Route::get('/bookmark', 'BookmarkController@index');
-    Route::post('/bookmark', 'BookmarkController@toggle');
 
     /**
      * User categories
@@ -96,7 +95,7 @@ Route::group(['middleware' => ['auth:api', 'verified']], function () {
     Route::group(['prefix' => '/user-businesses/optional-attributes'], function () {
         Route::get('/', 'UserOptionalAttributesController@index');
         Route::post('/', 'UserOptionalAttributesController@store');
-        Route::patch('/', 'UserOptionalAttributesController@update');
+        Route::put('/', 'UserOptionalAttributesController@update');
         Route::delete('/', 'UserOptionalAttributesController@delete');
     });
 
@@ -104,14 +103,12 @@ Route::group(['middleware' => ['auth:api', 'verified']], function () {
      * Business
      */
     Route::post('/businesses', 'BusinessesController@store');
-    Route::post('/businesses/{business}', 'BusinessesController@update');
+    Route::put('/businesses/{business}', 'BusinessesController@update');
     Route::delete('/businesses/{business}', 'BusinessesController@delete');
     Route::get('/businesses/{business}', 'BusinessesController@show');
+    Route::post('/businesses/bookmark', 'BusinessesController@toggleBookmark');
     Route::get('/business-search', 'BusinessSearchController@index');
-    Route::post('/businesses/{business}/avatar', 'BusinessesController@updateAvatar');
-    Route::get('/businesses/{business}/avatar/delete', 'BusinessesController@deleteAvatar');
     Route::get('/top-categories', 'TopCategoriesSearchController@search');
-
     Route::get('/nearby-suggest', 'NearbySuggestController@index');
 
 
@@ -119,7 +116,7 @@ Route::group(['middleware' => ['auth:api', 'verified']], function () {
      * Business Bio
      */
     Route::get('/business-bio/{id}', 'BusinessBioController@show');
-    Route::patch('/business-bio', 'BusinessBioController@update');
+    Route::put('/business-bio', 'BusinessBioController@update');
 
     /**
      * Business Bio
@@ -144,7 +141,7 @@ Route::group(['middleware' => ['auth:api', 'verified']], function () {
     /**
      * Business Reviews
      */
-    Route::post('/business-reviews', 'BusinessReviewsController@store');
+    Route::post('/business-reviews/{business}', 'BusinessReviewsController@store');
     Route::get('/user-business-reviews/{userId}', 'UserReviewsController@index');
 
     /**
@@ -196,10 +193,8 @@ Route::group(['middleware' => ['auth:api', 'verified']], function () {
     /**
      * Ownership
      */
-    Route::get('/ownership-methods/{businessId}', 'Ownership\MethodsController@index');
-    Route::post('/ownership-requests/{businessId}', 'Ownership\RequestsController@store');
-    Route::get('/ownership-requests/{businessId}', 'Ownership\RequestsController@index');
-    Route::post('/confirm-ownership/{businessId}', 'Ownership\ConfirmController@index');
+    Route::post('/ownership-requests/{business}', 'OwnershipController@store');
+    Route::post('/ownership-requests/{ownershipRequest}/verify', 'OwnershipController@verify')->name('business.verification');
 
     /**
      * Feed

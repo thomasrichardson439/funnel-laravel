@@ -26,7 +26,6 @@ class NearbySuggestRequest extends FormRequest
         return [
             'lat' => 'required|numeric',
             'lon' => 'required|numeric',
-            'radius' => 'required|numeric',
         ];
     }
 }

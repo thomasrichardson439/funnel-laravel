@@ -6,8 +6,6 @@ use App\Console\Commands\BusinessFixHtmlEntities;
 use App\Console\Commands\BusinessFixUtf8;
 use App\Console\Commands\BusinessGenerateGeoCommand;
 use App\Console\Commands\PlaceShowWrongCoords;
-use App\Console\Commands\UpdateCoverPhoto;
-use App\Console\Commands\InsertDataIntoBusinessHoursTable;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 
@@ -19,9 +17,7 @@ class Kernel extends ConsoleKernel
      * @var array
      */
     protected $commands = [
-        UpdateCoverPhoto::class,
         PlaceShowWrongCoords::class,
-        InsertDataIntoBusinessHoursTable::class,
         BusinessFixUtf8::class,
         BusinessFixHtmlEntities::class,
         BusinessGenerateGeoCommand::class,

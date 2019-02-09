@@ -14,6 +14,16 @@ class Category extends Model
     protected $hidden = ["uuid","deleted_at","created_at", "updated_at"];
 
     /**
+     * Get the route key for the model.
+     *
+     * @return string
+     */
+    public function getRouteKeyName()
+    {
+        return 'uuid';
+    }
+
+    /**
      * @var \App\Elastic\Configurators\Category
      */
     protected $indexConfigurator = \App\Elastic\Configurators\Category::class;

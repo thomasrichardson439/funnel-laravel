@@ -25,7 +25,7 @@ class Feed extends BaseElasticModel
         'images',
         'type',
         'location',
-        'code',
+        'score',
         'comment',
         'meta',
         'text',

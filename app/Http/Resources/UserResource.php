@@ -2,6 +2,8 @@
 
 namespace App\Http\Resources;
 
+use Illuminate\Support\Facades\Storage;
+
 class UserResource extends BaseJsonResource
 {
     /**
@@ -13,15 +15,15 @@ class UserResource extends BaseJsonResource
     public function toArray($request)
     {
         return [
-            'id' => $this->id,
+            'id' => $this->uuid,
             'name' => $this->name,
             'email' => $this->email,
             'phone_number' => $this->phone_number,
             'verified' => (bool) $this->verified,
             'age_group' => $this->age_group,
             'gender' => $this->gender,
-            'cover_photo' => $this->cover_photo,
-            'avatar_photo' => $this->avatar_photo,
+            'cover_photo' => $this->cover_photo ? Storage::disk('public_new')->url($this->cover_photo) : null,
+            'avatar_photo' => $this->avatar_photo ? Storage::disk('public_new')->url($this->avatar_photo) : null,
             'bio' => $this->bio,
             'allow_location_tracking' => (bool) $this->allow_location_tracking,
             'post_publicly' => (bool) $this->post_publicly,

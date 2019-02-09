@@ -47,7 +47,7 @@ class UsersController extends Controller
 
     /**
      * Update current logged in user
-     * @OA\Post(
+     * @OA\Put(
      *     path="/api/v1/users",
      *   @OA\RequestBody(
      *         @OA\MediaType(

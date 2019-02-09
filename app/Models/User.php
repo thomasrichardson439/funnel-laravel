@@ -4,11 +4,11 @@ namespace App\Models;
 
 use App\Notifications\VerifyEmailNotification;
 use App\Traits\HasUuid;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Hash;
 use Laravel\Passport\HasApiTokens;
-use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable implements MustVerifyEmail
@@ -27,10 +27,10 @@ class User extends Authenticatable implements MustVerifyEmail
      *
      * @var array
      */
-    protected $guarded  = [
+    protected $guarded = [
         'id',
         'remember_token',
-        'password'
+        'password',
     ];
 
     /**
@@ -88,6 +88,16 @@ class User extends Authenticatable implements MustVerifyEmail
         $token->revoke();
     }
 
+    /*
+     * A User can have many ownership requests
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function businessOwnershipRequests()
+    {
+        return $this->hasMany(OwnershipRequest::class, 'user_id');
+    }
+
     /**
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
@@ -129,20 +139,19 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany('App\Model\Business', 'user_bookmarks', 'user_id', 'business_id')->withPivot('status');
     }
 
-
     /**
      * Send account verificaton function
      */
     public function sendVerification()
     {
-        if(isset($this->email)) {
+        if (isset($this->email)) {
 //            $this->sendEmailVerificationNotification();
             $this->notify(new VerifyEmailNotification());
         } else {
             $pin = \HelperServiceProvider::generatePin(5);
 
             $this->fill([
-                'verification_code' => Hash::make($pin)
+                'verification_code' => Hash::make($pin),
             ])->save();
 
             $application = config('app.name');

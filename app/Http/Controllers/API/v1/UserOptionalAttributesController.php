@@ -87,7 +87,7 @@ class UserOptionalAttributesController extends Controller
     }
 
     /**
-     *  @OA\Patch(
+     *  @OA\Put(
      *   path="/api/v1/user-businesses/optional-attributes",
      *     summary="Update optional attribute",
      *     @OA\RequestBody(

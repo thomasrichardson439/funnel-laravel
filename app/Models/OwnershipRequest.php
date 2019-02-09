@@ -2,50 +2,45 @@
 
 namespace App\Models;
 
+use App\Traits\HasUuid;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 
 class OwnershipRequest extends Model
 {
-    protected $fillable = ['user_id', 'business_id', 'method', 'address', 'token', 'user_info', 'confirmed_at'];
+    use HasUuid;
+
+    protected $table = 'ownership_requests';
+
+    protected $guarded = [];
 
     protected $casts = [
         'user_info' => 'array',
     ];
 
-    public function scopeIsNotConfirmed($query)
+    /**
+     * Get the route key for the model.
+     *
+     * @return string
+     */
+    public function getRouteKeyName()
     {
-        return $query->whereRaw('confirmed_at IS NULL');
-    }
-
-    public function scopeIsNotExpired($query)
-    {
-        return $query->where('created_at', '>=', Carbon::now()->subMinutes(config('ownership.token_lifetime')));
+        return 'uuid';
     }
 
     /**
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
-    public function business() {
-        return
-            $this->belongsTo(Business::class);
+    public function business()
+    {
+        return $this->belongsTo(Business::class, 'business_id', 'uuid');
     }
 
     /**
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
-    public function user() {
-        return
-            $this->belongsTo(User::class);
-    }
-
-    public function confirmRequest() {
-        Ownerships::create([
-           'business_id' => $this->business_id,
-           'user_id'     => $this->user_id,
-           'request_id'  => $this->id
-        ]);
-        $this->confirmed_at = Carbon::now();
-        $this->save();
+    public function user()
+    {
+        return $this->belongsTo(User::class);
     }
 }

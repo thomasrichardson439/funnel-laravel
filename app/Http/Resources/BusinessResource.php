@@ -12,10 +12,11 @@ class BusinessResource extends BaseJsonResource
      */
     public function toArray($request)
     {
+        $this->user_id = $this->user->uuid;
         return array_merge(
             parent::toArray($request),
             [
-                'hours'      => BusinessHoursResource::collection($this->businessHours),
+                'user_id' =>  $this->user->uuid,
                 'attributes' => BusinessAttributeResource::collection($this->attributes),
                 'optional_attributes' => BusinessOptionalAttributeResource::collection($this->optionalAttributes),
                 'categories' => CategoryResource::collection($this->categories),

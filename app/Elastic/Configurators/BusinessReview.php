@@ -49,7 +49,7 @@ class BusinessReview extends IndexConfigurator
                     ]
                 ]
             ],
-            'code'        => [
+            'score'        => [
                 'type' => 'byte'
             ],
             'comment'     => [

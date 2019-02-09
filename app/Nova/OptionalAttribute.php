@@ -41,7 +41,7 @@ class OptionalAttribute extends Resource
     {
         return [
             Text::make('name'),
-            Image::make('image')->disk('public_new'),
+            Image::make('image')->disk('public_new')->path('images'),
             Text::make('Description', 'pivot.description')
                 ->hideWhenCreating()
                 ->hideFromDetail(),

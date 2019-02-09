@@ -52,7 +52,7 @@ class UserService
      */
     public function getUserReviews($userId, $perPage)
     {
-        return $this->model->where('uuid', $userId)->first()->reviews()->with('images', 'business')->latest()->paginate($perPage);
+        return $this->model->where('uuid', $userId)->first()->reviews()->with('business')->latest()->paginate($perPage);
     }
 
     /**

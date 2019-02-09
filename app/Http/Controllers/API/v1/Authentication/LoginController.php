@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\API\v1\Authentication;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Api\Authentication\LoginRequest;
+use App\Http\Resources\UserResource;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -15,7 +17,7 @@ class LoginController extends Controller
     /**
      * @OA\Post(
      *     path="/api/v1/login",
-    *      summary="Login to the system",
+     *      summary="Login to the system",
      *     @OA\RequestBody(
      *         @OA\MediaType(
      *             mediaType="application/json",
@@ -44,23 +46,17 @@ class LoginController extends Controller
      *      description="Access token information",
      *   )
      * )
-     * @param Request $request
-     * @return \Illuminate\Contracts\Routing\ResponseFactory|\Illuminate\Http\Response
+     * @param LoginRequest $request
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function store(Request $request)
+    public function store(LoginRequest $request)
     {
-        $request->validate([
-            'email'       => 'required_without:phone_number|string|email',
-            'phone_number' => 'required_without:email|string',
-            'password'    => 'required|string',
-            'remember_me' => 'boolean|nullable',
-        ]);
 
         $credentials = request(['email', 'password']);
 
         if($request->filled('email')) {
             if (!\Auth::attempt($credentials)) {
-                return response()->json([
+                return $this->sendResponse([
                     'message' => 'Unauthorized',
                 ], 401);
             }
@@ -87,12 +83,11 @@ class LoginController extends Controller
 
         $token->save();
 
-        return response()->json([
+        return $this->sendResponse([
             'access_token' => $tokenResult->accessToken,
             'token_type'   => 'Bearer',
-            'expires_at'   => Carbon::parse(
-                $tokenResult->token->expires_at
-            )->toDateTimeString(),
+            'expires_at'   => Carbon::parse($tokenResult->token->expires_at)->toDateTimeString(),
+            'user'         => new UserResource($user),
         ]);
     }
 
@@ -104,7 +99,7 @@ class LoginController extends Controller
      *
      * )
      * @param Request $request
-     * @return \Illuminate\Contracts\Routing\ResponseFactory|\Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function logout(Request $request) {
 
@@ -113,6 +108,6 @@ class LoginController extends Controller
          */
         $request->user()->tokens()->delete();
 
-        return response('You have been successfully logged out', 200);
+        return $this->sendResponse('You have been successfully logged out', 200);
     }
 }

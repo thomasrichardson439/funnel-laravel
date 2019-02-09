@@ -43,7 +43,9 @@ class Sticker extends Resource
     public function fields(Request $request)
     {
         return [
-            Avatar::make('Image', 'image'),
+            Avatar::make('Image', 'image')
+                ->disk('public_new')
+                ->path('images'),
             Text::make('Tags', 'tags'),
             BelongsToMany::make('Categories', 'categories', StickerCategory::class)
         ];

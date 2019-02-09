@@ -21,7 +21,7 @@ class UpdateOpenHours extends TestCase
         $user   = factory(\App\Models\User::class)->create();
         Passport::actingAs($user);
 
-        $businessHour = factory(\App\Models\BusinessHour::class)->create();
+        $businessHour = factory(\App\Models\BusinessOpeningHours::class)->create();
         $params       = [
             'open_period_mins'        => '9:00AM',
             'close_period_mins' => $businessHour->close_period_mins,

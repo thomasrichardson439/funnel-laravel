@@ -5,6 +5,7 @@ namespace App\Nova;
 use Acme\ImageBox\ImageBox;
 use Acme\MapBox\MapBox;
 use Acme\MapField\MapField;
+use App\Models\BusinessOpeningHours;
 use App\Nova\Actions\GenerateBusinessBioAction;
 use App\Nova\Filters\BusinessCategory;
 use Laravel\Nova\Fields\Avatar;
@@ -102,7 +103,8 @@ class Business extends Resource
                 ->hideWhenCreating()
                 ->hideFromIndex(),
             Avatar::make('Cover', 'cover_path')
-                ->disk('remote')
+                ->disk('public_new')
+                ->path('images')
                 ->hideWhenCreating()
                 ->hideWhenUpdating()
                 ->hideFromDetail(),
@@ -128,17 +130,17 @@ class Business extends Resource
             Text::make('lng')
                 ->hideFromIndex()
                 ->hideFromDetail(),
-            Image::make('Image', 'avatar')->disk('public_new')
+            Image::make('Image', 'avatar')->disk('public_new')->path('images')
                 ->creationRules('required', 'image','mimes:jpg,jpeg,png,gif'),
             BelongsToMany::make('Categories', 'categories', Category::class),
             HasMany::make('DataAI Keywords', 'keywords', BusinessKeyword::class),
-            new Panel('Posts', [
-                ImageBox::make('postImages')
-                    ->hideFromIndex()
-                    ->hideWhenCreating()
-                    ->hideWhenUpdating(),
-            ]),
-            HasMany::make('Open Hours', 'hours', BusinessHour::class),
+//            new Panel('Posts', [
+//                ImageBox::make('postImages')
+//                    ->hideFromIndex()
+//                    ->hideWhenCreating()
+//                    ->hideWhenUpdating(),
+//            ]),
+//            HasMany::make('Open Hours', 'hours', BusinessOpeningHours::class),
             HasMany::make('Reviews', 'reviews', BusinessReview::class),
             HasMany::make('Attributes', 'attributes', BusinessAttribute::class),
             BelongsToMany::make('Business Attributes', 'optionalAttributes', OptionalAttribute::class)

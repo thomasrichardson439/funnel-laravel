@@ -63,14 +63,14 @@ class BusinessReview extends Resource
                 })
             ,
             Text::make('comment')->hideFromIndex(),
-            Number::make('code')->displayUsing(function ($code) {
-                return round($code / 5 * 100) . '%';
+            Number::make('score')->displayUsing(function ($score) {
+                return $score . '%';
             }),
             DateTime::make('Date', 'created_at')->format('DD/MM/YYYY')
                 ->sortable()
                 ->hideWhenCreating()
                 ->hideWhenUpdating(),
-            HasMany::make('Images', 'images', BusinessReviewImage::class),
+//            HasMany::make('Images', 'images', BusinessReviewImage::class),
             HasMany::make('Keywords', 'keywords', BusinessReviewKeyword::class),
 
         ];

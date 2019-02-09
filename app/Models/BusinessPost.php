@@ -16,7 +16,6 @@ class BusinessPost extends Model
         'expire_date'  => 'date'
     ];
 
-    protected $with   = ['images'];
     protected $hidden = ['uuid'];
 
     protected $indexConfigurator = \App\Elastic\Configurators\BusinessPost::class;
@@ -30,7 +29,7 @@ class BusinessPost extends Model
             'user_id'       => $this->user_id,
             'title'         => $this->title,
             'type'          => 'post',
-            'images'        => $this->getImages(),
+            'cover_photo'        => $this->cover_photo,
             'location'      => [
                 'lat' => $this->business->lat,
                 'lon' => $this->business->lng
@@ -38,30 +37,7 @@ class BusinessPost extends Model
             'text'          => $this->text,
             'meta'          => $this->meta,
             'expire_date'   => isset($this->expire_date) ?? $this->expire_date,
-            'hours'         => $this->business->hours
         ];
-    }
-
-    /**
-     * @return \Illuminate\Database\Eloquent\Collection
-     */
-    public function getImages()
-    {
-        return $this
-                ->hasMany(BusinessPostImage::class)
-                ->get(['path'])
-            ;
-    }
-
-    /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
-     */
-    public function images() {
-        return $this->hasMany(BusinessPostImage::class);
-    }
-
-    public function coverImages() {
-        return $this->images()->where('cover', true);
     }
 
     /**
@@ -76,27 +52,6 @@ class BusinessPost extends Model
      */
     public function user() {
         return $this->belongsTo(User::class);
-    }
-
-    /**
-     * @param $request
-     * @return mixed
-     */
-    public function createImage($request) {
-        return $this->images()->create($request);
-    }
-
-    public function getImagePathAttribute() {
-        if ( count($this->images) ) {
-            return $this->images->first()->path;
-        }
-    }
-
-    public function getImageUrlAttribute()
-    {
-        if ( count($this->images) ) {
-            return $this->images->first()->url;
-        }
     }
 
 }

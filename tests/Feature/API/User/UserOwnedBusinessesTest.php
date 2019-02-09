@@ -26,8 +26,8 @@ class UserOwnedBusinessesTest extends TestCase
             ->assertStatus(200);
 
         $content = json_decode($response->getContent(), true);
-        $this->assertTrue(array_key_exists('cover_photo_url', $content['data'][0]));
-        $this->assertTrue(array_key_exists('avatar_photo_url', $content['data'][0]));
+        $this->assertTrue(array_key_exists('cover_photo', $content['data'][0]));
+        $this->assertTrue(array_key_exists('avatar', $content['data'][0]));
 
     }
 }

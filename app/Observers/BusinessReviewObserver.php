@@ -25,7 +25,7 @@ class BusinessReviewObserver
      */
     public function updated(BusinessReview $businessReview)
     {
-        if ($businessReview->wasChanged('code')) {
+        if ($businessReview->wasChanged('score')) {
             $businessReview->business->updateScores();
         }
     }

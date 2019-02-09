@@ -50,10 +50,14 @@ class User extends Resource
             ID::make()->sortable(),
 
             Avatar::make('Cover Photo', 'cover_photo')
+                ->disk('public_new')
+                ->path('images')
                 ->hideWhenCreating()
                 ->path($this->cover_photo),
 
             Avatar::make('Avatar Photo', 'avatar_photo')
+                ->disk('public_new')
+                ->path('images')
                 ->hideWhenCreating()
                 ->path($this->avatar_photo),
 

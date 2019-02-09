@@ -3,7 +3,9 @@
 namespace App\Providers;
 
 use App\Models\Business;
+use App\Models\BusinessReview;
 use App\Policies\BusinessPolicy;
+use App\Policies\BusinessReviewPolicy;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 use Laravel\Passport\Passport;
@@ -17,6 +19,7 @@ class AuthServiceProvider extends ServiceProvider
      */
     protected $policies = [
         Business::class => BusinessPolicy::class,
+        BusinessReview::class => BusinessReviewPolicy::class,
     ];
 
     /**

@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers\API\v1;
 
+use App\Models\Business;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use App\Http\Handlers\BusinessHourHandler;
 use App\Http\Resources\BusinessHoursResource;
 
 class BusinessHoursController extends Controller
@@ -12,7 +12,7 @@ class BusinessHoursController extends Controller
 	/**
 	 *
 	 * @OA\Put(
-	 *     path="/api/v1/business-hours/{id}",
+	 *     path="/api/v1/business-hours/{business}",
      *     summary="Update business hours",
      *  @OA\RequestBody(
      *         @OA\MediaType(
@@ -76,7 +76,7 @@ class BusinessHoursController extends Controller
 	 *
 	 * Update the specified resource in storage.
 	 */
-    public function updateOpenHours(Request $request, $id, BusinessHourHandler $businessHourHandler)
+    public function update(Request $request, Business $business)
     {
     	$this->validate($request, [
     	    'open_period_mins' => ['required'],

@@ -45,7 +45,9 @@ class BusinessReviewImage extends Resource
             ID::make('id')
                 ->hideFromIndex()
                 ->hideFromDetail(),
-            Avatar::make('Image','path'),
+            Avatar::make('Image','path')
+                ->disk('public_new')
+                ->path('images'),
             Text::make('text')
                 ->hideFromDetail()
                 ->hideFromIndex(),

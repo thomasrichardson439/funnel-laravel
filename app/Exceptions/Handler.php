@@ -11,6 +11,8 @@ use Illuminate\Routing\Exceptions\InvalidSignatureException;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 use Spatie\Permission\Exceptions\UnauthorizedException;
+use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
+use Symfony\Component\Routing\Exception\MethodNotAllowedException;
 
 class Handler extends ExceptionHandler
 {
@@ -90,6 +92,14 @@ class Handler extends ExceptionHandler
             ], 404);
         }
 
+        if ($exception instanceof MethodNotAllowedHttpException) {
+            return response()->json([
+                'data' => [
+                    'message' => 'This method is not allowed on this endpoint',
+                    'error' => $exception->getMessage()
+                ]
+            ], 404);
+        }
 
         if ($exception instanceof ValidationException || $exception instanceof ApiException) {
             return response()->json([
@@ -100,7 +110,13 @@ class Handler extends ExceptionHandler
             ], 422);
         }
 
-         Log::info($exception);
-         return parent::render($request, $exception);
+        Log::info($exception);
+        return response()->json([
+            'data' => [
+                'message' => 'Unhandled exception error.',
+                'error' => $exception->getMessage()
+            ]
+        ], 500);
+
     }
 }

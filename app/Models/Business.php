@@ -4,23 +4,24 @@ namespace App\Models;
 
 use App\Models\Traits\HasOpenableHours;
 use App\Models\Traits\WithRelationsTrait;
-use Carbon\Carbon;
+use App\Traits\HasUuid;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\URL;
-use ScoutElastic\Searchable;
-use App\Traits\HasUuid;
 use Illuminate\Support\Str;
+use ScoutElastic\Searchable;
 
 class Business extends Model
 {
     use Searchable, HasUuid, WithRelationsTrait, HasOpenableHours;
 
     protected $guarded = [];
-    protected $hidden   = ['internal_score',  'avatar', 'cover_photo'];
-    protected $appends  = ['cover_photo_url', 'avatar_photo_url'];
+
+    protected $with = ['bookmark'];
+
+    protected $hidden  = ['internal_score'];
+
 
     /**
      * Get the route key for the model.
@@ -41,14 +42,14 @@ class Business extends Model
      * @var array
      */
     protected $searchRules = [
-        \App\Elastic\Rules\BusinessSearchRule::class
+        \App\Elastic\Rules\BusinessSearchRule::class,
     ];
-
 
     /**
      * On boot actions, attach default behaviour
      */
-    protected static function boot() {
+    protected static function boot()
+    {
 
         parent::boot();
 
@@ -64,97 +65,97 @@ class Business extends Model
     const boostOpened    = 5.5;
     const boostNameMatch = 1.0;
     const fuzziness      = 5;
-    const OPEN_HOUR = 'open';
-    const BUSINESS_HOUR = 'business';
+    const OPEN_HOUR      = 'open';
+    const BUSINESS_HOUR  = 'business';
 
     /**
      * @var array
      */
     protected $mapping = [
         'properties' => [
-            'id'                => [
+            'id'              => [
                 'type'  => 'integer',
-                'index' => 'true'
+                'index' => 'true',
             ],
-            'name'              => [
+            'name'            => [
                 'type'   => 'text',
                 'fields' => [
                     'english' => [
                         'type'     => 'text',
-                        'analyzer' => 'english'
+                        'analyzer' => 'english',
                     ],
                     'synonym' => [
                         'type'     => 'text',
                         'analyzer' => 'synonym_analyzer',
-                        'index'    => 'true'
+                        'index'    => 'true',
                     ],
-                ]
+                ],
             ],
-            'suggest' => [
-                'type' => 'completion'
+            'suggest'         => [
+                'type' => 'completion',
             ],
-            'exact_name'        => [
+            'exact_name'      => [
                 'type'     => 'text',
                 'analyzer' => 'substring_analyzer',
-                'index'    => 'true'
+                'index'    => 'true',
             ],
-            'categories'        => [
+            'categories'      => [
                 'type'       => 'nested',
                 'properties' => [
-                    'id' => [
-                        'type' => 'integer',
-                        'index' => 'false'
+                    'id'   => [
+                        'type'  => 'integer',
+                        'index' => 'false',
                     ],
                     'name' => [
                         'type'     => 'text',
                         'index'    => 'true',
-                        'analyzer' => 'whitespace_analyzer'
+                        'analyzer' => 'whitespace_analyzer',
                     ],
-                ]
+                ],
             ],
-            'location'          => [
+            'location'        => [
                 'type'  => 'geo_point',
-                'index' => 'true'
+                'index' => 'true',
             ],
-            'total_reviews'     => [
-                'type' => 'long'
+            'total_reviews'   => [
+                'type' => 'long',
             ],
-            'score'             => [
+            'score'           => [
                 'type'  => 'integer',
-                'index' => 'true'
+                'index' => 'true',
             ],
-            'internal_score'    => [
-                'type' => 'integer'
+            'internal_score'  => [
+                'type' => 'integer',
             ],
-            'total_posts'      => [
-                'type' => 'long'
+            'total_posts'     => [
+                'type' => 'long',
             ],
-            'hours'          => [
+            'hours'           => [
                 'type'       => 'nested',
                 'properties' => [
                     'day_of_week'       => [
                         'type'  => 'byte',
-                        'index' => 'true'
+                        'index' => 'true',
                     ],
                     'open_period_mins'  => [
                         'type'  => 'short',
-                        'index' => 'true'
+                        'index' => 'true',
                     ],
                     'close_period_mins' => [
                         'type'  => 'short',
-                        'index' => 'true'
-                    ]
-                ]
+                        'index' => 'true',
+                    ],
+                ],
             ],
-            'cover_photo_url'   => [
+            'cover_photo' => [
                 'type'  => 'text',
-                'index' => 'false'
+                'index' => 'false',
             ],
-            'avatar' => [
-                'type' => 'text',
-                'index' => 'false'
-            ]
-        ]
+            'avatar'          => [
+                'type'  => 'text',
+                'index' => 'false',
+            ],
+        ],
     ];
 
     /**
@@ -163,22 +164,21 @@ class Business extends Model
     public function toSearchableArray()
     {
         return [
-            'id'              => $this->id,
-            'uuid'            => $this->uuid,
-            'name'            => $this->name,
-            'suggest'         => $this->name,
-            'exact_name'      => $this->name,
-            'location'        => [
+            'id'                  => $this->id,
+            'uuid'                => $this->uuid,
+            'name'                => $this->name,
+            'suggest'             => $this->name,
+            'exact_name'          => $this->name,
+            'location'            => [
                 'lat' => $this->lat,
-                'lon' => $this->lng
+                'lon' => $this->lng,
             ],
-            'total_reviews'   => $this->reviews_count,
-            'total_posts'     => $this->posts_count,
-            'categories'      => $this->categories,
+            'total_reviews'       => $this->reviews_count,
+            'total_posts'         => $this->posts_count,
+            'categories'          => $this->categories,
             'optional_attributes' => $this->optionalAttributes,
-            'internal_score'  => $this->internal_score,
-            'hours'           => $this->businessHours,
-            'cover_photo_url' => $this->cover_photo_url
+            'internal_score'      => $this->internal_score,
+            'cover_photo'     => $this->cover_photo,
         ];
     }
 
@@ -187,14 +187,20 @@ class Business extends Model
      */
     public static function withRequiredForUpdate()
     {
-        return (new static)->newQuery()
+        return (new static )->newQuery()
             ->with('categories')
             ->withCount('reviews', 'posts');
     }
 
-    public function businessHours()
+
+    public function bookmark()
     {
-        return $this->hasMany(BusinessHour::class)->where('hour_type', '=', self::BUSINESS_HOUR);
+        return $this->hasMany(Bookmark::class)->where('user_id', auth()->id() ?? null);
+    }
+
+    public function getBookmarkAttribute($v)
+    {
+     dd($v);
     }
 
     /**
@@ -245,9 +251,9 @@ class Business extends Model
         $countReviews = $this->reviews_count;
         $avgReview    = $this->reviews_avg_code;
 
-        if($countReviews  === 0) {
+        if ($countReviews === 0) {
             $score = 80;
-        } else if($countReviews < 5) {
+        } else if ($countReviews < 5) {
             $score = ($avgReview / 5 * 0.3 + 0.5) * 100;
         } else {
             $score = $avgReview / 5 * 100;
@@ -282,7 +288,8 @@ class Business extends Model
         $this->internal_score = $score;
     }
 
-    public function updateScores() {
+    public function updateScores()
+    {
         $this->updateInternalScore();
         $this->updateScore();
         $this->save();
@@ -291,17 +298,17 @@ class Business extends Model
     /**
      * @return string|null
      */
-    public function getAvatarPhotoUrlAttribute()
+    public function getAvatarAttribute($v)
     {
-        return $this->avatar ? Storage::disk('public_new')->url($this->avatar) : null;
+        return $v ? Storage::disk('public_new')->url($v) : null;
     }
 
     /**
      * @return string|null
      */
-    public function getCoverPhotoUrlAttribute()
+    public function getCoverPhotoAttribute($v)
     {
-        return $this->cover_photo ? Storage::disk('public_new')->url($this->cover_photo) : null;
+        return $v ? Storage::disk('public_new')->url($v) : null;
     }
 
     public function getTotalPostsAttribute()
@@ -315,12 +322,12 @@ class Business extends Model
     public function categories()
     {
         return
-            $this
-                ->belongsToMany(Category::class, 'business_category')
-                ->withPivot(['relevance'])
-                ->withTimestamps()
-                ->orderBy('relevance', 'DESC')
-            ;
+        $this
+            ->belongsToMany(Category::class, 'business_category')
+            ->withPivot(['relevance'])
+            ->withTimestamps()
+            ->orderBy('relevance', 'DESC')
+        ;
     }
 
     public function categoriesExists()
@@ -364,7 +371,7 @@ class Business extends Model
     public function totalEmailAttributes()
     {
         return
-            $this->hasMany(BusinessAttribute::class)->where('key', 'email');
+        $this->hasMany(BusinessAttribute::class)->where('key', 'email');
     }
 
     /**
@@ -391,11 +398,11 @@ class Business extends Model
     public function reviews()
     {
         return
-            $this
-                ->hasMany(BusinessReview::class)
-                ->select(['*', DB::raw("IF(`comment` > '', 1, 0) `order`")])
-                ->orderBy('order', 'DESC')
-                ->orderBy('created_at', 'DESC');
+        $this
+            ->hasMany(BusinessReview::class)
+            ->select(['*', DB::raw("IF(`comment` > '', 1, 0) `order`")])
+            ->orderBy('order', 'DESC')
+            ->orderBy('created_at', 'DESC');
     }
 
     public function getReviewsCountAttribute($count)
@@ -409,7 +416,7 @@ class Business extends Model
 
     public function reviewsAvgCode()
     {
-        return $this->hasManyAvg('code', BusinessReview::class);
+        return $this->hasManyAvg('score', BusinessReview::class);
     }
 
     public function getReviewsAvgCodeAttribute()
@@ -455,7 +462,8 @@ class Business extends Model
     /**
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
-    public function posts() {
+    public function posts()
+    {
         return $this->hasMany(BusinessPost::class);
     }
 
@@ -481,36 +489,33 @@ class Business extends Model
     /**
      * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
      */
-    public function users() {
+    public function users()
+    {
         return $this
-                ->belongsToMany(User::class);
+            ->belongsToMany(User::class);
     }
 
-    public function user() {
-        return $this
-            ->belongsTo(User::class);
+    public function user()
+    {
+        return $this->belongsTo(User::class);
     }
 
-
-        /**
+    /**
      * return \Illuminate\Database\Eloquent\Relations\BelongsToMany
      */
-    public function optionalAttributes() {
-        return
-            $this
-                ->belongsToMany(OptionalAttribute::class)
-                ->withPivot(['description'])
-                ->withTimestamps()
-            ;
+    public function optionalAttributes()
+    {
+        return $this->belongsToMany(OptionalAttribute::class)
+            ->withPivot(['description'])
+            ->withTimestamps();
     }
-
-
 
     /**
      * Duplicate
      * @param $value
      */
-    public function setOpenPeriodMinsAttribute($value) {
+    public function setOpenPeriodMinsAttribute($value)
+    {
         $this->attributes['open_period_mins'] = Business::minutesCnt($value);
     }
 
@@ -518,7 +523,8 @@ class Business extends Model
      * Duplicate
      * @param $value
      */
-    public function setClosePeriodMinsAttribute($value) {
+    public function setClosePeriodMinsAttribute($value)
+    {
         $this->attributes['close_period_mins'] = Business::minutesCnt($value);
     }
 }

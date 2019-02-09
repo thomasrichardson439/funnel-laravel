@@ -2,15 +2,30 @@
 
 namespace App\Http\Controllers\API\v1;
 
-use App\Services\BusinessService;
-use Illuminate\Http\Request;
+use App\Http\Requests\Api\Businesses\SearchBusinessesRequest;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\BusinessCollectionResource;
+use App\Services\Api\BusinessService;
 
 class BusinessSearchController extends Controller
 {
     /**
+     * @var BusinessService
+     */
+    private $businessService;
+
+    /**
+     * BusinessSearchController constructor.
+     * @param BusinessService $businessService
+     */
+    public function __construct(BusinessService $businessService)
+    {
+        $this->businessService = $businessService;
+    }
+
+    /**
      *
-     *  @OA\Get(
+     * @OA\Get(
      *     path="/api/v1/business-search",
      *     summary="search business by query",
      *     @OA\Parameter(
@@ -25,17 +40,23 @@ class BusinessSearchController extends Controller
      *
      *   @OA\Response(response="200", description="List businesses"),
      *  )
-     * @param Request $request
+     * @param SearchBusinessesRequest $request
      * @param BusinessService $businessService
      * @return \Illuminate\Http\JsonResponse
-     * @throws \Exception
+     * @throws \Illuminate\Validation\ValidationException
      */
-    public function index(Request $request, BusinessService $businessService)
+    public function index(SearchBusinessesRequest $request)
     {
-        $this->validate($request, [
-            'query' => 'string|required'
-        ]);
-
-        return response()->json($businessService->suggest($request->get('query')));
+        $businesses = $this->businessService->search(
+            $request->get('lat'),
+            $request->get('lng'),
+            $request->get('radius'),
+            $request->get('keyword', '*'),
+            $request->get('category_id'),
+            $this->perPage()
+        );
+        return $this->sendResponse(
+            new BusinessCollectionResource($businesses)
+        );
     }
 }

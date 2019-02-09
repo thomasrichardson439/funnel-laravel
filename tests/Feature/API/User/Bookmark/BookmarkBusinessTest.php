@@ -90,7 +90,7 @@ class BookmarkBusinessTest extends TestCase
                 [
                     'uuid'         => $business->uuid,
                     'name'         => $business->name,
-                    'cover_photo_url'  => $business->cover_photo_url,
+                    'cover_photo'  => $business->cover_photo,
                     'score'        => $business->score
                 ]
             ]);

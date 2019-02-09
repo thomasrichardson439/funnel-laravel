@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\API\v1;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Api\UserFeed\UserFeedRequest;
 use App\Http\Resources\UserFeedResource;
 use App\Services\FeedService;
 use Illuminate\Http\Request;
@@ -33,18 +34,15 @@ class UserFeedController extends Controller
      *   @OA\Response(response="200", description="List of user's home feed")
      * )
      * @param FeedService $feedService
-     * @param Request $request
+     * @param UserFeedRequest $request
      * @return \Illuminate\Http\Resources\Json\AnonymousResourceCollection
-     * @throws \Exception
      */
-    public function homeFeed(FeedService $feedService, Request $request)
+    public function homeFeed(FeedService $feedService, UserFeedRequest $request)
     {
         $lat = $request->input('lat');
         $lng = $request->input('lng');
         $distance = $request->input('distance');
-
         $feed = $feedService->forHomeFeed($lat, $lng, $distance);
-
         return UserFeedResource::collection($feed);
     }
 }

@@ -49,8 +49,9 @@ class BusinessPolicy
      */
     public function update(User $user, Business $business)
     {
-          return in_array($business->id, $user->businesses()->pluck('id')->toArray());
+        return in_array($business->id, $user->businesses()->pluck('id')->toArray());
     }
+
 
     /**
      * Determine whether the user can delete the business.
@@ -63,6 +64,8 @@ class BusinessPolicy
     {
         return in_array($business->id, $user->businesses()->pluck('id')->toArray());
     }
+
+
 
     /**
      * Determine whether the user can restore the business.

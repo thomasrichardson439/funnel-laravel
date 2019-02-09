@@ -42,17 +42,6 @@ class CreateBusinessesTable extends Migration
             $table->index('relevance');
         });
 
-        Schema::create('business_hours', function (Blueprint $table) {
-            $table->increments('id');
-            $table->unsignedInteger('business_id');
-            $table->string('day_of_week');
-            $table->integer('open_period_mins');
-            $table->integer('close_period_mins');
-            $table->timestampsTz();
-            $table->softDeletesTz();
-
-            $table->foreign('business_id')->references('id')->on('businesses');
-        });
     }
 
     /**
@@ -62,7 +51,6 @@ class CreateBusinessesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('business_hours');
         Schema::dropIfExists('business_category');
         Schema::dropIfExists('businesses');
     }

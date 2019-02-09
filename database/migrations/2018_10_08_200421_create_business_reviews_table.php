@@ -23,9 +23,7 @@ class CreateBusinessReviewsTable extends Migration
             $table->text('meta')->nullable();
             $table->softDeletesTz();
             $table->timestampsTz();
-
             $table->index(['business_id', 'code']);
-
             $table->foreign('business_id')->references('id')->on('businesses');
             $table->foreign('user_id')->references('id')->on('users');
         });

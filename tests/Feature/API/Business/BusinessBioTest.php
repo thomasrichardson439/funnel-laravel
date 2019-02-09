@@ -64,9 +64,6 @@ class BusinessBioTest extends TestCase
         $businessCategory = factory(\App\Models\BusinessCategory::class)->create([
             'business_id' => $business->id
         ]);
-        $businessHours = factory(\App\Models\BusinessHour::class)->create([
-            'business_id' => $business->id
-        ]);
 
         $bioShouldBeString = $business->name . " is a " . $businessCategory->category->name . " in les Escaldes open 1 days per week";
 

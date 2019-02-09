@@ -12,9 +12,6 @@ class BusinessReviewResource extends BaseJsonResource
      */
     public function toArray($request)
     {
-        return array_merge(
-            parent::toArray($request),
-            ['images' => ReviewImageResource::collection($this->images)]
-        );
+        return parent::toArray($request);
     }
 }

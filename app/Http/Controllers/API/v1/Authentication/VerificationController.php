@@ -90,10 +90,14 @@ class VerificationController extends Controller {
             $request->user()->update([
                 'verified' => true
             ]);
+
+            return response()->json([
+                'verification' => true
+            ]);
         }
 
         return response()->json([
-            'verification' => true
+            'verification' => false
         ]);
     }
 

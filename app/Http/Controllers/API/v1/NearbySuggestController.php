@@ -44,16 +44,7 @@ class NearbySuggestController extends Controller
      *         @OA\Schema(
      *             type="float"
      *         )
-     *     ),
-     *     @OA\Parameter(
-     *         name="radius",
-     *         in="query",
-     *         description="Radius",
-     *         required=true,
-     *         @OA\Schema(
-     *             type="float"
-     *         )
-     *     ),
+     *     )
      *   @OA\Response(response="200", description="List of BusinessResource")
      *  )
      * @param NearbySuggestRequest $request
@@ -63,8 +54,7 @@ class NearbySuggestController extends Controller
     {
         $businesses = $this->businessService->getNearby(
             $request->get('lat'),
-            $request->get('lon'),
-            $request->get('radius')
+            $request->get('lon')
         );
         return $this->sendResponse(
             new BusinessCollectionResource($businesses)

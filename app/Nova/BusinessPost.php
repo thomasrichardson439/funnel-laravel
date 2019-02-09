@@ -52,12 +52,11 @@ class BusinessPost extends Resource
         return [
             BelongsTo::make('Business', 'business', Business::class),
             Image::make('Image', 'image_path')
-                ->disk('remote')
+                ->disk('public_new')->path('images')
                 ->hideWhenUpdating()
                 ->hideWhenCreating(),
             Date::make('Expire date', 'expire_date')
                 ->sortable()
-
         ];
     }
 

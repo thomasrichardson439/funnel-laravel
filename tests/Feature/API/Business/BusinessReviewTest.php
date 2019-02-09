@@ -22,8 +22,8 @@ class BusinessReviewTest extends TestCase
         $params       = [
             'comment'     => $businessReview->comment,
             'business_id' => $businessReview->business->uuid,
-            'code'        => $businessReview->code,
-            'photo'       => 'iVBORw0KGgoAAAANSUhEUgAAADgAAAA4CAYAAACohjseAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAJBJREFUeNrs2rERgzAQRUHJQwGUoBLspu2BZnAJlEAHMgqcOXP22Q0gfiMR3A21916S3Uo4gQIFChT4j+m1rtv5vof2vccJtuADbNP5eARH7gUAAIBf6nNZ5uSJfgy8W/LAO1YWR/ANPXykAAAA1zRWFi15ov+uLObUiX6sLPbgG7pX/4sKFChQoMALB34EGACdOBjKuiIUuAAAAABJRU5ErkJggg=='
+            'score'        => $businessReview->code,
+            'review_photo'       => 'iVBORw0KGgoAAAANSUhEUgAAADgAAAA4CAYAAACohjseAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAJBJREFUeNrs2rERgzAQRUHJQwGUoBLspu2BZnAJlEAHMgqcOXP22Q0gfiMR3A21916S3Uo4gQIFChT4j+m1rtv5vof2vccJtuADbNP5eARH7gUAAIBf6nNZ5uSJfgy8W/LAO1YWR/ANPXykAAAA1zRWFi15ov+uLObUiX6sLPbgG7pX/4sKFChQoMALB34EGACdOBjKuiIUuAAAAABJRU5ErkJggg=='
         ];
 
         $response = $this->json('POST', '/api/v1/business-reviews', $params);

@@ -3,14 +3,40 @@
 namespace App\Http\Controllers\API\v1;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Api\Sticker\StickerRequest;
+use App\Http\Resources\StickerCategoryResource;
 use App\Http\Resources\StickerResource;
 use App\Models\Sticker;
+use App\Services\Api\StickerCategoryService;
+use App\Services\Api\StickerService;
 use Illuminate\Http\Request;
 
 class StickersController extends Controller
 {
+
     /**
-     *  @OA\Get(
+     * @var StickerService
+     */
+    private $stickerService;
+
+    /**
+     * @var StickerCategoryService
+     */
+    private $stickerCategoryService;
+
+    /**
+     * StickersController constructor.
+     * @param StickerService $stickerService
+     * @param StickerCategoryService $stickerCategoryService
+     */
+    public function __construct(StickerService $stickerService, StickerCategoryService $stickerCategoryService)
+    {
+        $this->stickerService = $stickerService;
+        $this->stickerCategoryService = $stickerCategoryService;
+    }
+
+    /**
+     * @OA\Get(
      *     path="/api/v1/stickers",
      *     summary="Get all stickers for category_id",
      *     @OA\Parameter(
@@ -33,36 +59,15 @@ class StickersController extends Controller
      *
      *     @OA\Response(response="200", description="List of StickerResource")
      *  )
-     * @param Request $request
+     * @param StickerRequest $request
      * @return \Illuminate\Http\JsonResponse
-     * @throws \Illuminate\Validation\ValidationException
      */
-    public function index(Request $request) {
-        $this->validate($request, [
-            'category_id' => 'sometimes|integer',
-            'tags'        => 'sometimes|string'
+    public function index(StickerRequest $request) {
+        $stickers = $this->stickerService->getAll($request->get('category_id'), $request->get('tags'));
+        $stickerCats = $this->stickerCategoryService->getAll();
+        return $this->sendResponse([
+            'stickers' =>  (new StickerResource($stickers)),
+            'categories' => (new StickerCategoryResource($stickerCats))
         ]);
-
-        $stickers   = Sticker::with('categories');
-        $categoryId = $request->get('category_id');
-        $tags       = $request->get('tags');
-
-        if (null !== $categoryId) {
-            $stickers->whereHas('categories', function ($query) use ($categoryId) {
-                $query->whereStickerCategoryId($categoryId);
-            });
-        }
-
-        if (null !== $tags) {
-            $tags = explode(",", $tags);
-            $stickers->where(function($query) use ($tags) {
-                foreach ($tags as $tag) {
-                    $query->orWhereRaw("FIND_IN_SET('$tag', tags)");
-                }
-            });
-        }
-
-        $stickers = $stickers->paginate();
-        return response()->json(new StickerResource($stickers));
     }
 }

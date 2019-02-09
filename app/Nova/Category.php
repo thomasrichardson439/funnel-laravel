@@ -48,7 +48,7 @@ class Category extends Resource
         return [
             ID::make()->sortable()->hideFromIndex(),
             // Fontawesome::make('Icon')->addButtonText('Choose Icon'),
-            Avatar::make('Icon')->disk('public_new')->creationRules('nullable', 'image'),
+            Avatar::make('Icon')->disk('public_new')->path('images')->creationRules('nullable', 'image'),
             Text::make('name'),
             Text::make('Relevance', 'pivot.relevance')
                 ->displayUsing(function ($value) {

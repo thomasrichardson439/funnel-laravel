@@ -17,7 +17,7 @@ class SearchBusinessResource extends JsonResource
         return [
             'name'        => $this->name,
             'id'          => $this->uuid,
-            'cover_photo' => $this->cover_photo_url,
+            'cover_photo' => $this->cover_photo,
             'lat'         => $this->lat,
             'lng'         => $this->lng
         ];

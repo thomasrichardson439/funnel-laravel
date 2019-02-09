@@ -44,7 +44,7 @@ class MapPreset extends Resource
     {
         return [
             Text::make('Name', 'name'),
-						Image::make('Image', 'image')->disk('public_new'),            BelongsToMany::make('Business categories', 'categories', Category::class),
+						Image::make('Image', 'image')->disk('public_new')->path('images'),            BelongsToMany::make('Business categories', 'categories', Category::class),
         ];
     }
 

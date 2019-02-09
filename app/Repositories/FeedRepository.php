@@ -121,11 +121,10 @@ class FeedRepository
     /**
      * @return mixed
      */
-    public function forHomeFeed(float $lat, float $lng, string $distance)
+    public function forHomeFeed(?float $lat, ?float $lng, ?string $distance)
     {
         $businessId = Business::search("*")
             ->whereGeoDistance("location", [$lng, $lat], $distance)->orderBy('score', 'desc')->get()->pluck('id')->toArray();
-
         // stash the query in a variable since we'll be reusing it in two separate places
         $getQuery = function ($id) {
             return BusinessPost::where('business_id', '=', $id)
@@ -152,22 +151,11 @@ class FeedRepository
         // seeding the inRandomOrder call removes need to cache the result as we roll the dice the same way each time
         $results = $query->inRandomOrder(1788)->paginate(10);
 
-        $paginator =
-            new LengthAwarePaginator(
-                $results,
-                $results->count(),
-                $this->size,
-                Paginator::resolveCurrentPage('page'),
-                [
-                    'path'     => Paginator::resolveCurrentPath(),
-                    'pageName' => 'page',
-                ]
-            );
-        // post-process paginator to bolt on URL fields
-        $scratch = $paginator->getCollection();
-        $data = $scratch['data'];
 
-        $data = array_map(function ($var) {
+        // post-process paginator to bolt on URL fields
+        $data = $results->getCollection();
+
+        $dataTemp = $data->map(function ($var) {
             if (null !== $var['user_avatar']) {
                 $var['user_avatar'] = Storage::disk('remote')->url($var['user_avatar']);
             }
@@ -180,10 +168,8 @@ class FeedRepository
             return $var;
         }, $data);
 
-        $scratch['data'] = $data;
+        $results->setCollection($dataTemp);
 
-        $paginator->setCollection($scratch);
-
-        return $paginator;
+        return $results;
     }
 }

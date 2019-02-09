@@ -14,7 +14,7 @@ class AddAvatarPhotoToUser extends Migration
     public function up()
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->string('avatar_photo')->after('cover_photo')->nullable();
+            $table->string('avatar_photo')->after('gender')->nullable();
         });
     }
 

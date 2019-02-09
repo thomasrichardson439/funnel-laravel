@@ -12,9 +12,6 @@ class BusinessPostResource extends BaseJsonResource
      */
     public function toArray($request)
     {
-        return array_merge(
-            parent::toArray($request),
-            ['images' => isset($this->images) ? BusinessPostImageResource::collection($this->images) : []]
-        );
+            return parent::toArray($request);
     }
 }

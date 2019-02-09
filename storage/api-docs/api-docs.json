@@ -155,30 +155,7 @@
                     }
                 }
             },
-            "post": {
-                "summary": "Toggle bookmark specified by ID for logged in user",
-                "operationId": "App\\Http\\Controllers\\API\\v1\\BookmarkController::toggle",
-                "requestBody": {
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "properties": {
-                                    "uuid": {
-                                        "type": "string"
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "Bookmark successfully created/deleted!"
-                    }
-                }
-            },
-            "patch": {
+            "put": {
                 "summary": "Updates a business bio",
                 "operationId": "App\\Http\\Controllers\\API\\v1\\BusinessBioController::update",
                 "requestBody": {
@@ -203,6 +180,29 @@
                 "responses": {
                     "200": {
                         "description": "Success"
+                    }
+                }
+            },
+            "post": {
+                "summary": "Toggle bookmark specified by ID for logged in user",
+                "operationId": "App\\Http\\Controllers\\API\\v1\\BookmarkController::toggle",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "uuid": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Bookmark successfully created/deleted!"
                     }
                 }
             }
@@ -276,10 +276,10 @@
                 }
             }
         },
-        "/api/v1/business-hours/{id}": {
+        "/api/v1/business-hours/{business}": {
             "put": {
                 "summary": "Update business hours",
-                "operationId": "App\\Http\\Controllers\\API\\v1\\BusinessHoursController::updateOpenHours",
+                "operationId": "App\\Http\\Controllers\\API\\v1\\BusinessHoursController::update",
                 "requestBody": {
                     "content": {
                         "application/json": {
@@ -477,7 +477,7 @@
                 }
             }
         },
-        "/api/v1/business-reviews": {
+        "/api/v1/business-reviews/{business}": {
             "post": {
                 "summary": "Create a business review",
                 "operationId": "App\\Http\\Controllers\\API\\v1\\BusinessReviewsController::store",
@@ -490,7 +490,7 @@
                                         "description": "id of business",
                                         "type": "string"
                                     },
-                                    "code": {
+                                    "score": {
                                         "description": "Score",
                                         "type": "int"
                                     },
@@ -499,8 +499,12 @@
                                         "type": "string"
                                     },
                                     "photo": {
-                                        "description": "base64 encoded review photo",
-                                        "type": "string"
+                                        "description": "image",
+                                        "type": "file"
+                                    },
+                                    "mode": {
+                                        "description": "Public or private entry.",
+                                        "type": "boolean"
                                     }
                                 },
                                 "type": "object"
@@ -590,85 +594,7 @@
                 }
             }
         },
-        "/api/v1/businesses/{id}/avatar": {
-            "post": {
-                "summary": "Upload an avatar",
-                "operationId": "App\\Http\\Controllers\\API\\v1\\BusinessesController::updateAvatar",
-                "requestBody": {
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "properties": {
-                                    "avatar": {
-                                        "description": "base 64 encoded avatar inage",
-                                        "type": "string"
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "Upload successfully"
-                    },
-                    "422": {
-                        "description": "Cannot upload avatar"
-                    }
-                }
-            }
-        },
-        "/api/v1/businesses/{id}/avatar/delete": {
-            "get": {
-                "operationId": "App\\Http\\Controllers\\API\\v1\\BusinessesController::deleteAvatar",
-                "responses": {
-                    "200": {
-                        "description": "delete avatar successfully"
-                    }
-                }
-            }
-        },
         "/api/v1/businesses": {
-            "put": {
-                "summary": "Update a business based on ID",
-                "operationId": "App\\Http\\Controllers\\API\\v1\\BusinessesController::update",
-                "requestBody": {
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "properties": {
-                                    "name": {
-                                        "description": "base 64 encoded avatar inage",
-                                        "type": "string"
-                                    },
-                                    "lat": {
-                                        "description": "latitude",
-                                        "type": "string"
-                                    },
-                                    "lng": {
-                                        "description": "longitude",
-                                        "type": "string"
-                                    },
-                                    "id": {
-                                        "description": "business uuid",
-                                        "type": "string"
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "Business updated"
-                    },
-                    "400": {
-                        "description": "Business not found"
-                    }
-                }
-            },
             "post": {
                 "summary": "Create a business",
                 "operationId": "App\\Http\\Controllers\\API\\v1\\BusinessesController::store",
@@ -696,6 +622,14 @@
                                     "avatar": {
                                         "description": "Avatar Image File",
                                         "type": "string"
+                                    },
+                                    "category_id": {
+                                        "description": "Category UUID",
+                                        "type": "string"
+                                    },
+                                    "cover_photo": {
+                                        "description": "Cover Photo Image File",
+                                        "type": "string"
                                     }
                                 },
                                 "type": "object"
@@ -708,7 +642,66 @@
                         "description": "BusinessResource"
                     }
                 }
-            },
+            }
+        },
+        "/api/v1/businesses/{business}": {
+            "put": {
+                "summary": "Update a business based on UUID passed.",
+                "operationId": "App\\Http\\Controllers\\API\\v1\\BusinessesController::update",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "name": {
+                                        "description": "base 64 encoded avatar inage",
+                                        "type": "string"
+                                    },
+                                    "lat": {
+                                        "description": "latitude",
+                                        "type": "string"
+                                    },
+                                    "lng": {
+                                        "description": "longitude",
+                                        "type": "string"
+                                    },
+                                    "id": {
+                                        "description": "business uuid",
+                                        "type": "string"
+                                    },
+                                    "category_id": {
+                                        "description": "Category Id",
+                                        "type": "integer"
+                                    },
+                                    "bio": {
+                                        "description": "business bio",
+                                        "type": "string"
+                                    },
+                                    "avatar": {
+                                        "description": "business avatar",
+                                        "type": "file"
+                                    },
+                                    "cover_photo": {
+                                        "description": "business cover photo",
+                                        "type": "file"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Business updated"
+                    },
+                    "400": {
+                        "description": "Business not found"
+                    }
+                }
+            }
+        },
+        "/api/v1/businesses/{businessId}": {
             "delete": {
                 "summary": "Delete a business by ID",
                 "operationId": "App\\Http\\Controllers\\API\\v1\\BusinessesController::delete",
@@ -922,9 +915,35 @@
                 }
             }
         },
-        "/api/v1/confirm-ownsership/{id}": {
+        "/api/v1/ownership-requests/{business}": {
             "post": {
-                "operationId": "App\\Http\\Controllers\\API\\v1\\Ownership\\ConfirmController::index",
+                "summary": "Submit business ownership request.",
+                "operationId": "App\\Http\\Controllers\\API\\v1\\OwnershipController::store",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "business uuid": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Ownership requests status - boolean"
+                    }
+                }
+            }
+        },
+        "/api/v1/ownership-requests/{ownershipRequest}/verify": {
+            "post": {
+                "summary": "Submit business ownership verification request.",
+                "operationId": "App\\Http\\Controllers\\API\\v1\\OwnershipController::verify",
                 "requestBody": {
                     "content": {
                         "application/json": {
@@ -932,10 +951,6 @@
                                 "properties": {
                                     "token": {
                                         "type": "string"
-                                    },
-                                    "id": {
-                                        "description": "Uuid of the category to delete",
-                                        "type": "string"
                                     }
                                 },
                                 "type": "object"
@@ -945,68 +960,7 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "Ownership resource updated"
-                    }
-                }
-            }
-        },
-        "/api/v1/ownership-methods/{businessId}": {
-            "get": {
-                "summary": "Get business ownership methods.",
-                "operationId": "App\\Http\\Controllers\\API\\v1\\Ownership\\MethodsController::index",
-                "parameters": [
-                    {
-                        "name": "businessId",
-                        "in": "query",
-                        "description": "Business ID.",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Ownership methods."
-                    }
-                }
-            }
-        },
-        "/api/v1/ownership-requests/{businessId}": {
-            "get": {
-                "summary": "Get business ownership requests.",
-                "operationId": "App\\Http\\Controllers\\API\\v1\\Ownership\\RequestsController::index",
-                "parameters": [
-                    {
-                        "name": "businessId",
-                        "in": "query",
-                        "description": "Business ID.",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Ownership requests."
-                    }
-                }
-            },
-            "post": {
-                "summary": "Get business ownership requests.",
-                "operationId": "App\\Http\\Controllers\\API\\v1\\Ownership\\RequestsController::store",
-                "requestBody": {
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "properties": {
-                                    "businessId": {
-                                        "type": "string"
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "Ownership requests status  - boolean"
+                        "description": "Ownership requests status - boolean"
                     }
                 }
             }
@@ -1167,6 +1121,38 @@
                     }
                 }
             },
+            "put": {
+                "summary": "Update optional attribute",
+                "operationId": "App\\Http\\Controllers\\API\\v1\\UserOptionalAttributesController::update",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "business_id": {
+                                        "description": "Business UUID",
+                                        "type": "string"
+                                    },
+                                    "optional_attribute_id": {
+                                        "description": "Optional Attribute UUID",
+                                        "type": "string"
+                                    },
+                                    "description": {
+                                        "description": "Description",
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Updated business optional attirbutes"
+                    }
+                }
+            },
             "post": {
                 "summary": "Save optional attribute",
                 "operationId": "App\\Http\\Controllers\\API\\v1\\UserOptionalAttributesController::store",
@@ -1226,38 +1212,6 @@
                         "description": "Deleted business optional attirbutes"
                     }
                 }
-            },
-            "patch": {
-                "summary": "Update optional attribute",
-                "operationId": "App\\Http\\Controllers\\API\\v1\\UserOptionalAttributesController::update",
-                "requestBody": {
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "properties": {
-                                    "business_id": {
-                                        "description": "Business UUID",
-                                        "type": "string"
-                                    },
-                                    "optional_attribute_id": {
-                                        "description": "Optional Attribute UUID",
-                                        "type": "string"
-                                    },
-                                    "description": {
-                                        "description": "Description",
-                                        "type": "string"
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "Updated business optional attirbutes"
-                    }
-                }
             }
         },
         "/api/v1/user-business-reviews/{userId}": {
@@ -1283,7 +1237,7 @@
             }
         },
         "/api/v1/users": {
-            "post": {
+            "put": {
                 "summary": "Update current logged in user",
                 "operationId": "App\\Http\\Controllers\\API\\v1\\UsersController::update",
                 "requestBody": {

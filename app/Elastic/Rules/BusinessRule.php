@@ -120,7 +120,6 @@ class BusinessRule
             ]
         ];
 
-        // check $mapPreset->businessHours->count()
         if ($mapPreset && !empty($mapPreset->businessHours->toArray())) {
             foreach ($mapPreset->businessHours as $businessHour) {
                 $hours = [];

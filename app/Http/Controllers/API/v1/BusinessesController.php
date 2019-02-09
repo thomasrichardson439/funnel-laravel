@@ -4,6 +4,7 @@ namespace App\Http\Controllers\API\v1;
 
 use App\Elastic\Rules\AggregationRule;
 use App\Elastic\Rules\AttributesCountRule;
+use App\Http\Requests\Api\Businesses\BookmarkBusiness;
 use App\Http\Requests\Api\Businesses\StoreBusiness;
 use App\Http\Requests\Api\Businesses\UpdateBusiness;
 use App\Models\Business;
@@ -13,7 +14,6 @@ use App\Rules\LatLng;
 use App\Services\Api\BusinessService;
 use Elasticsearch\Client;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 class BusinessesController extends Controller
@@ -122,83 +122,6 @@ class BusinessesController extends Controller
     }
 
 
-    /**
-     * @OA\Post(
-     *     path="/api/v1/businesses/{id}/avatar",
-     *     summary="Upload an avatar",
-     *     @OA\RequestBody(
-     *         @OA\MediaType(
-     *             mediaType="application/json",
-     *             @OA\Schema(
-     *                 @OA\Property(
-     *                     property="avatar",
-     *                     description="base 64 encoded avatar inage",
-     *                     type="string"
-     *                 )
-     *             )
-     *         ),
-     *     ),
-     *
-     *     @OA\Response(response="200", description="Upload successfully"),
-     *     @OA\Response(
-     *         response="422",
-     *         description="Cannot upload avatar"
-     *     )
-     * )
-     * @param Request $request
-     * @param $id
-     * @return \Illuminate\Http\JsonResponse
-     * @throws \Illuminate\Auth\Access\AuthorizationException
-     * @throws \Illuminate\Validation\ValidationException
-     */
-    public function updateAvatar(Request $request, $id) {
-        $this->validate($request, [
-            'avatar' => ['required']
-        ]);
-
-        $business = Business::find($id);
-
-        $this->authorize('delete', $business);
-
-        if($business && $request->avatar) {
-            $filename = $business->id.'-'.substr( md5( $business->id . '-' . time() ), 0, 15) . '.jpg'; // for now just assume .jpg : \
-            $path = public_path('storage/' . $filename);
-            Image::make($request->avatar)->orientate()->fit(500)->save($path);
-            $business->avatar = $filename;
-            $business->save();
-            return response()->json(new BusinessResource($business), 200);
-        } else {
-            return response('Something wrong', 422);
-        }
-    }
-
-    /**
-     * @OA\Get(
-     *     path="/api/v1/businesses/{id}/avatar/delete",
-     *
-     *     @OA\Response(response="200", description="delete avatar successfully"),
-     * )
-     * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
-     * @throws \Illuminate\Auth\Access\AuthorizationException
-     */
-
-    public function deleteAvatar($id) {
-        $business = Business::find($id);
-
-        $this->authorize('delete', $business);
-
-        if($business && !empty($business->avatar)) {
-            // TODO: should $filename be defined somewhat similarly as in $updateAvatar?
-//            $path = public_path('storage/' . $filename);
-//            unlink(storage_path($path));
-
-            $business->avatar = '';
-            $business->save();
-
-        }
-        return response()->json(new BusinessResource($business), 200);
-    }
 
     /**
      * @OA\Post(
@@ -234,6 +157,11 @@ class BusinessesController extends Controller
      *                     type="string"
      *                 ),
      *                 @OA\Property(
+     *                     property="category_id",
+     *                     description="Category UUID",
+     *                     type="string"
+     *                 ),
+     *                 @OA\Property(
      *                     property="cover_photo",
      *                     description="Cover Photo Image File",
      *                     type="string"
@@ -249,14 +177,14 @@ class BusinessesController extends Controller
      */
     public function store(StoreBusiness $request)
     {
-        $business = $this->businessService->create($request->all());
+        $business = $this->businessService->create($request->validated());
         return $this->sendResponse(new BusinessResource($business), 201);
     }
 
     /**
-     * @OA\Post(
-     *     path="/api/v1/businesses/{businessId}",
-     *     summary="Update a business based on ID",
+     * @OA\Put(
+     *     path="/api/v1/businesses/{business}",
+     *     summary="Update a business based on UUID passed.",
      *  @OA\RequestBody(
      *         @OA\MediaType(
      *             mediaType="application/json",
@@ -281,6 +209,26 @@ class BusinessesController extends Controller
      *                     description="business uuid",
      *                     type="string"
      *                 ),
+     *                 @OA\Property(
+     *                     property="category_id",
+     *                     description="Category Id",
+     *                     type="integer"
+     *                 ),
+     *                 @OA\Property(
+     *                     property="bio",
+     *                     description="business bio",
+     *                     type="string"
+     *                 ),
+     *                 @OA\Property(
+     *                     property="avatar",
+     *                     description="business avatar",
+     *                     type="file"
+     *                 ),
+     *                 @OA\Property(
+     *                     property="cover_photo",
+     *                     description="business cover photo",
+     *                     type="file"
+     *                 ),
      *             )
      *         ),
      *     ),
@@ -292,10 +240,11 @@ class BusinessesController extends Controller
      * @return \Illuminate\Http\JsonResponse
      * @throws \Illuminate\Auth\Access\AuthorizationException
      */
-    public function update(UpdateBusiness $request, $businessUuid)
+    public function update(Business $business, UpdateBusiness $request)
     {
-//        $this->authorize('update', $business);
-        $business = $this->businessService->update($businessUuid, $request->all());
+        $this->authorize('update', $business);
+
+        $business = $this->businessService->update($business, $request->validated());
 
         return $this->sendResponse(new BusinessResource($business), 200);
     }
@@ -332,4 +281,40 @@ class BusinessesController extends Controller
 
         return $this->sendResponse(['message' => 'Resource deleted successfully'], 200);
     }
+
+    /**
+     * @OA\POST(
+     *     path="/api/v1/bookmark",
+     *     summary="Toggle bookmark specified by ID for logged in user",
+     *     @OA\RequestBody(
+     *         @OA\MediaType(
+     *             mediaType="application/json",
+     *             @OA\Schema(
+     *                 @OA\Property(
+     *                     property="uuid",
+     *                     type="string"
+     *                 )
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(response="200", description="Bookmark successfully created/deleted!"),
+     *
+     * )
+     * @param BookmarkBusiness $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function toggleBookmark(BookmarkBusiness $request)
+    {
+        $result = $this->businessService->bookmark($request->get('uuid'));
+        if ($result == false) {
+            return $this->sendResponse([
+                'message' => 'Bookmark successfully deleted!',
+            ], 200);
+        }
+        return
+            $this->sendResponse([
+                'message' => 'Bookmark successfully created!',
+            ], 200);
+    }
+
 }

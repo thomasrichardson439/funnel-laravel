@@ -80,12 +80,6 @@ class BusinessPostService
         /** @var BusinessPost $businessPost */
         $businessPost = $this->model->create($data);
 
-        if ($data['imagePath']) {
-            $businessPost->images()->create([
-                'path' => $data['imagePath']
-            ]);
-        }
-
         return $businessPost;
     }
 
@@ -115,7 +109,6 @@ class BusinessPostService
     public function delete($businessPostUuid)
     {
         $post = $this->model->uuid($businessPostUuid);
-        $post->images()->delete();
         return $post->delete();
     }
 

@@ -3,6 +3,7 @@
 namespace App\Services\Api;
 
 use App\Models\Business;
+use App\Models\Category;
 use App\Utils\GeoLocation;
 use App\Utils\ImageUploadService;
 use Illuminate\Http\UploadedFile;
@@ -31,6 +32,11 @@ class BusinessService
      */
     private $categoryService;
 
+    /**
+     * @var BookmarkService
+     */
+    private $bookmarkService;
+
 
     /**
      * BusinessService constructor.
@@ -38,16 +44,19 @@ class BusinessService
      * @param GeoLocation $geoLocation
      * @param ImageUploadService $imageUploadService
      * @param CategoryService $categoryService
+     * @param BookmarkService $bookmarkService
      */
     public function __construct(Business $model,
                                 GeoLocation $geoLocation,
                                 ImageUploadService $imageUploadService,
-                                CategoryService $categoryService)
+                                CategoryService $categoryService,
+                                BookmarkService $bookmarkService)
     {
         $this->model = $model;
         $this->geoLocation = $geoLocation;
         $this->imageUploadService = $imageUploadService;
         $this->categoryService = $categoryService;
+        $this->bookmarkService = $bookmarkService;
     }
 
     /**
@@ -63,13 +72,35 @@ class BusinessService
      * @param $lat
      * @param $lon
      * @param $radius
+     * @param $keyword
+     * @param $categoryId
+     * @param $howMany
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    public function search($lat, $lon, $radius, $keyword, $categoryId, $howMany)
+    {
+        $boundingBox  = $this->geoLocation->getElasticSearchBounding($lat, $lon, $radius);
+        return $this->model->search($keyword)->whereGeoBoundingBox('location', $boundingBox)->take($howMany)->paginate();
+    }
+
+    /**
+     * @param $lat
+     * @param $lon
      * @param int $howMany
      * @return \Illuminate\Database\Eloquent\Collection
      */
-    public function getNearby($lat, $lon, $radius, $howMany = 50)
+    public function getNearby($lat, $lon, $howMany = 10)
     {
-        $boundingBox  = $this->geoLocation->getElasticSearchBounding($lat, $lon, $radius);
-        return $this->model->search('*')->whereGeoBoundingBox('location', $boundingBox)->take($howMany)->get();
+        $radius = 1;
+        $count = 0;
+        $result = null;
+        while ($count < 10 || $radius <= 10) {
+            $boundingBox  = $this->geoLocation->getElasticSearchBounding($lat, $lon, $radius);
+            $result = $this->model->search('*')->whereGeoBoundingBox('location', $boundingBox)->take($howMany)->get();
+            $count = count($result);
+            $radius += 1;
+        }
+        return $result;
     }
 
     /**
@@ -82,62 +113,66 @@ class BusinessService
     }
 
     /**
-     * @param $data
+     * @param $validatedBusiness
      * @return Business
      * @throws \App\Exceptions\GeneralException
      */
-    public function create($data)
+    public function create(array $validatedBusiness)
     {
-        $categoryId = $data['category_id'];
-
-        unset($data['category_id']);
-
         DB::beginTransaction();
 
-        if (!empty($data['avatar'])) {
-            $data['avatar'] = $this->processImage($data, 'avatar');
+        if (!empty($validatedBusiness['cover_photo'])) {
+            $validatedBusiness['cover_photo'] = $this->processImage($validatedBusiness, 'cover_photo');
         }
-        if (!empty($data['cover_photo'])) {
-            $data['cover_photo'] = $this->processImage($data, 'cover_photo');
-        }
-        $business = $this->model->create($data);
 
-        if($categoryId) {
-            $cat = $this->categoryService->get($categoryId);
-            $business->categories()->attach($cat->id, [
+        if (!empty($validatedBusiness['avatar'])) {
+            $validatedBusiness['avatar'] = $this->processImage($validatedBusiness, 'avatar');
+        }
+
+        unset($validatedBusiness['category_id']);
+        $validatedBusiness['verified'] = true;
+        $business = request()->user()->businesses()->create(
+            $validatedBusiness
+        );
+
+        if(request()->filled('category_id')) {
+            $categoryId = Category::find(request('category_id'));
+            $business->categories()->attach($categoryId, [
                 'relevance' => 100
             ]);
         }
 
         DB::commit();
+
         return $business;
     }
 
-    public function update($businessUuid, array $data)
+    public function update(Business $business, array $validatedBusiness)
     {
-        $business = $this->get($businessUuid);
-        $categoryId = $data['category_id'];
-        unset($data['category_id']);
-
         DB::beginTransaction();
 
-        if (!empty($data['avatar'])) {
-            $data['avatar'] = $this->processImage($data, 'avatar');
+        if (!empty($validatedBusiness['cover_photo'])) {
+            $validatedBusiness['cover_photo'] = $this->processImage($validatedBusiness, 'cover_photo');
         }
-        if (!empty($data['cover_photo'])) {
-            $data['cover_photo'] = $this->processImage($data, 'cover_photo');
-        }
-        $business = $business->fill($data);
-        $business->update($data);
 
-        if($categoryId) {
-            $cat = $this->categoryService->get($categoryId);
-            $business->categories()->sync($cat->id, [
+        if (!empty($validatedBusiness['avatar'])) {
+            $validatedBusiness['avatar'] = $this->processImage($validatedBusiness, 'avatar');
+        }
+
+        unset($validatedBusiness['category_id']);
+
+        $business->update(
+            $validatedBusiness
+        );
+
+        if(request()->filled('category_id')) {
+            $business->categories()->attach(request('category_id'), [
                 'relevance' => 100
             ]);
         }
 
         DB::commit();
+
         return $business;
     }
 
@@ -174,6 +209,20 @@ class BusinessService
             return $this->imageUploadService->saveImage($data[$key], 'images');
         }
         return null;
+    }
+
+    public function bookmark($uuid)
+    {
+        $business = $this->get($uuid);
+
+        $bookmark = $this->bookmarkService->getBookmarkForBusiness($business->id);
+
+        if ($bookmark){
+            $bookmark->delete();
+            return false;
+        }
+        $this->bookmarkService->create($business->id);
+        return true;
     }
 
 }

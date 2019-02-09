@@ -12,9 +12,8 @@ class BusinessBioGeneratorService
         $businessName = $business->name;
         $categoryName = $business->categories()->firstOrFail()->name;
         $cityName = self::getCityName($business);
-        $countDayOfWeek = $business->businessHours()->count();
 
-        return "$businessName is a $categoryName in $cityName open $countDayOfWeek days per week";
+        return "$businessName is a $categoryName in $cityName open X days per week";
     }
 
     public static function getCityName(Business $business): string

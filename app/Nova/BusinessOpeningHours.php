@@ -2,20 +2,18 @@
 
 namespace App\Nova;
 
-use Laravel\Nova\Fields\ID;
 use Illuminate\Http\Request;
-use Laravel\Nova\Http\Requests\NovaRequest;
-use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Fields\Boolean;
+use Laravel\Nova\Fields\Text;
 
-class BusinessHour extends Resource
+class BusinessOpeningHours extends Resource
 {
     /**
      * The model the resource corresponds to.
      *
      * @var string
      */
-    public static $model = 'App\\Models\\BusinessHour';
+    public static $model = 'App\\Models\\BusinessOpeningHours';
 
     /**
      * The single value that should be used to represent the resource when being displayed.
@@ -72,7 +70,7 @@ class BusinessHour extends Resource
             Boolean::make('Wednesday', 'wd_3'),
             Boolean::make('Thursday', 'wd_4'),
             Boolean::make('Friday', 'wd_5'),
-            Boolean::make('Saturday', 'wd_6')
+            Boolean::make('Saturday', 'wd_6'),
         ];
     }
 

@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class AddHourTypeToBusinessHours extends Migration
+class CreateAdditionalBusinessReviewColumns extends Migration
 {
     /**
      * Run the migrations.
@@ -13,8 +13,8 @@ class AddHourTypeToBusinessHours extends Migration
      */
     public function up()
     {
-        Schema::table('business_hours', function (Blueprint $table) {
-            $table->string('hour_type')->default('business');
+        Schema::table('business_reviews', function (Blueprint $table) {
+            $table->renameColumn('code', 'score');
         });
     }
 
@@ -25,8 +25,8 @@ class AddHourTypeToBusinessHours extends Migration
      */
     public function down()
     {
-        Schema::table('business_hours', function (Blueprint $table) {
-            $table->dropColumn('hour_type');
+        Schema::table('business_reviews', function (Blueprint $table) {
+            $table->renameColumn('score', 'code');
         });
     }
 }
