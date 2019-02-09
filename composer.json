@@ -38,7 +38,7 @@
         "spatie/laravel-permission": "^2.30",
         "twilio/sdk": "^5.28",
         "zircote/swagger-php": "^3.0",
-        "algoliasearch-client-php": "^1.27"
+        "algolia/algoliasearch-client-php": "^1.27"
     },
     "require-dev": {
         "beyondcode/laravel-dump-server": "^1.0",
